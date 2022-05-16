@@ -12,7 +12,20 @@ pub struct Init {}
 // have `eval "$(mcfly init bash)"` in their config.
 //
 // See: https://github.com/cantino/mcfly/issues/254
-const BASH_SOURCE_STANZA: &str = "source <(mcfly init bash --print_full_init)";
+const BASH_SOURCE_STANZA: &str =
+    r#"
+    __main() {
+        local major="${BASH_VERSINFO[0]}"
+        local minor="${BASH_VERSINFO[1]}"
+        if ((major > 4)) || { ((major == 4)) && ((minor >= 1)); }; then
+            source <(mcfly init bash --print_full_init)
+        else
+            eval "$(mcfly init bash --print_full_init)"
+        fi
+    }
+    __main
+    unset -f __main
+"#;
 const ZSH_SOURCE_STANZA: &str = "source <(mcfly init zsh --print_full_init)";
 
 impl Init {
